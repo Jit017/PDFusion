@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
 import { Upload, FileUp, FileDown, Trash2, MoveVertical, FileText, 
-  Check, X, ChevronDown, ChevronUp, Edit, Eye } from "lucide-react"
-import { PDFDocument, StandardFonts } from "pdf-lib"
+  Check, X, ChevronDown, ChevronUp, Edit, Eye, RotateCw, RotateCcw } from "lucide-react"
+import { PDFDocument, StandardFonts, degrees } from "pdf-lib"
 import { useToast } from "@/hooks/use-toast"
 import Navbar from "@/components/navbar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -26,6 +26,7 @@ interface PDFFileWithData {
   preview?: string
   pageCount?: number
   selectedPages?: boolean[]
+  pageRotations?: number[]
   isExpanded?: boolean
 }
 
@@ -35,6 +36,28 @@ interface PDFMetadata {
   author: string
   subject: string
   keywords: string
+}
+
+// Type for password protection
+interface PasswordProtection {
+  enableEncryption: boolean
+  userPassword: string
+  ownerPassword: string
+  permissions: {
+    printing: boolean
+    modifying: boolean
+    copying: boolean
+    annotating: boolean
+    fillingForms: boolean
+    contentAccessibility: boolean
+    documentAssembly: boolean
+  }
+}
+
+// Type for compression options
+interface CompressionOptions {
+  enableCompression: boolean
+  compressionLevel: 'low' | 'medium' | 'high'
 }
 
 // Convert File to ArrayBuffer using FileReader
@@ -63,6 +86,24 @@ export default function PDFMerger() {
     author: "",
     subject: "",
     keywords: ""
+  })
+  const [passwordProtection, setPasswordProtection] = useState<PasswordProtection>({
+    enableEncryption: false,
+    userPassword: "",
+    ownerPassword: "",
+    permissions: {
+      printing: true,
+      modifying: true,
+      copying: true,
+      annotating: true,
+      fillingForms: true,
+      contentAccessibility: true,
+      documentAssembly: true
+    }
+  })
+  const [compressionOptions, setCompressionOptions] = useState<CompressionOptions>({
+    enableCompression: false,
+    compressionLevel: 'medium'
   })
   
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -132,6 +173,9 @@ export default function PDFMerger() {
       // Create selected pages array (all selected by default)
       const selectedPages = new Array(pageCount).fill(true)
       
+      // Create rotation array (0 degrees for all pages by default)
+      const pageRotations = new Array(pageCount).fill(0)
+      
       // Create a thumbnail of the first page
       if (pageCount > 0) {
         const [firstPage] = pdfDoc.getPages()
@@ -153,6 +197,7 @@ export default function PDFMerger() {
           preview: pdfBytes,
           pageCount,
           selectedPages,
+          pageRotations,
           isExpanded: false
         }
       }
@@ -164,6 +209,7 @@ export default function PDFMerger() {
         type: file.type,
         pageCount,
         selectedPages,
+        pageRotations,
         isExpanded: false
       }
     } catch (error) {
@@ -267,6 +313,27 @@ export default function PDFMerger() {
     })
   }
 
+  // Add a function to rotate a specific page
+  const rotatePage = (fileIndex: number, pageIndex: number, direction: 'clockwise' | 'counterclockwise') => {
+    setFiles(prevFiles => {
+      const newFiles = [...prevFiles]
+      if (!newFiles[fileIndex].pageRotations) {
+        newFiles[fileIndex].pageRotations = new Array(newFiles[fileIndex].pageCount).fill(0)
+      }
+      
+      // Calculate new rotation
+      const currentRotation = newFiles[fileIndex].pageRotations![pageIndex]
+      const rotationChange = direction === 'clockwise' ? 90 : -90
+      
+      // Update rotation (keep it between 0 and 270 degrees)
+      let newRotation = (currentRotation + rotationChange) % 360
+      if (newRotation < 0) newRotation += 360
+      
+      newFiles[fileIndex].pageRotations![pageIndex] = newRotation
+      return newFiles
+    })
+  }
+
   const mergePDFs = async () => {
     console.log("Merge PDFs triggered with files:", files)
     if (files.length === 0) {
@@ -309,7 +376,20 @@ export default function PDFMerger() {
             const copiedPages = await mergedPdf.copyPages(pdfDoc, selectedPageIndices)
             console.log(`Pages copied: ${copiedPages.length}`)
             
-            copiedPages.forEach((page) => mergedPdf.addPage(page))
+            // Add pages to the merged PDF with rotation applied
+            copiedPages.forEach((page, i) => {
+              const originalIndex = selectedPageIndices[i]
+              
+              // Apply rotation if specified
+              if (fileData.pageRotations && fileData.pageRotations[originalIndex] !== 0) {
+                const rotation = fileData.pageRotations[originalIndex]
+                page.setRotation(degrees(rotation))
+                console.log(`Applied rotation of ${rotation} degrees to page ${i}`)
+              }
+              
+              mergedPdf.addPage(page)
+            })
+            
             console.log(`Pages added to merged document`)
           }
         } catch (fileError) {
@@ -325,9 +405,63 @@ export default function PDFMerger() {
       mergedPdf.setSubject(metadata.subject || "")
       mergedPdf.setKeywords(metadata.keywords.split(',').map(k => k.trim()) || [])
       
-      // Save the merged PDF
+      // Apply password protection if enabled
+      if (passwordProtection.enableEncryption) {
+        console.log("Applying password protection")
+        
+        // Convert boolean permissions to PDFLib permission flags
+        const permissions = {
+          printing: passwordProtection.permissions.printing ? 
+            { allowed: true, flags: [4] } : { allowed: false },
+          modifying: passwordProtection.permissions.modifying ? 
+            { allowed: true } : { allowed: false },
+          copying: passwordProtection.permissions.copying ? 
+            { allowed: true } : { allowed: false },
+          annotating: passwordProtection.permissions.annotating ? 
+            { allowed: true } : { allowed: false },
+          fillingForms: passwordProtection.permissions.fillingForms ? 
+            { allowed: true } : { allowed: false },
+          contentAccessibility: passwordProtection.permissions.contentAccessibility ? 
+            { allowed: true } : { allowed: false },
+          documentAssembly: passwordProtection.permissions.documentAssembly ? 
+            { allowed: true } : { allowed: false }
+        }
+        
+        // Apply encryption
+        await mergedPdf.encrypt({
+          userPassword: passwordProtection.userPassword || undefined,
+          ownerPassword: passwordProtection.ownerPassword || undefined,
+          permissions
+        })
+      }
+      
+      // Save the merged PDF with compression settings if enabled
       console.log("Saving merged PDF")
-      const mergedPdfBytes = await mergedPdf.save()
+      
+      // Compression options
+      const pdfSaveOptions: any = {}
+      
+      if (compressionOptions.enableCompression) {
+        console.log(`Applying compression level: ${compressionOptions.compressionLevel}`)
+        
+        // Set compression level based on selected option
+        switch (compressionOptions.compressionLevel) {
+          case 'low':
+            pdfSaveOptions.objectsPerTick = 50
+            pdfSaveOptions.compress = true
+            break
+          case 'medium':
+            pdfSaveOptions.objectsPerTick = 100
+            pdfSaveOptions.compress = true
+            break
+          case 'high':
+            pdfSaveOptions.objectsPerTick = 200
+            pdfSaveOptions.compress = true
+            break
+        }
+      }
+      
+      const mergedPdfBytes = await mergedPdf.save(pdfSaveOptions)
       console.log(`Merged PDF saved, size: ${mergedPdfBytes.length} bytes`)
 
       // Create a blob from the PDF bytes
@@ -458,59 +592,342 @@ export default function PDFMerger() {
           <TabsContent value="settings">
             <Card className="border-0 shadow-xl bg-white/80 dark:bg-gray-800/50 backdrop-blur-sm">
               <CardContent className="p-6">
-                <h2 className="text-2xl font-bold mb-6">Output Settings</h2>
-                <div className="space-y-4">
-                  <div className="grid gap-3">
-                    <Label htmlFor="filename">Output Filename</Label>
-                    <Input
-                      id="filename"
-                      placeholder="merged-document"
-                      value={customFilename}
-                      onChange={(e) => setCustomFilename(e.target.value)}
-                    />
-                  </div>
+                <Tabs defaultValue="general">
+                  <TabsList className="grid w-full grid-cols-3 mb-6">
+                    <TabsTrigger value="general" className="text-base py-2">General</TabsTrigger>
+                    <TabsTrigger value="security" className="text-base py-2">Security</TabsTrigger>
+                    <TabsTrigger value="compression" className="text-base py-2">Compression</TabsTrigger>
+                  </TabsList>
                   
-                  <div className="grid gap-3">
-                    <Label htmlFor="title">Document Title</Label>
-                    <Input
-                      id="title"
-                      placeholder="Merged Document"
-                      value={metadata.title}
-                      onChange={(e) => setMetadata({...metadata, title: e.target.value})}
-                    />
-                  </div>
+                  <TabsContent value="general">
+                    <h2 className="text-2xl font-bold mb-6">Output Settings</h2>
+                    <div className="space-y-4">
+                      <div className="grid gap-3">
+                        <Label htmlFor="filename">Output Filename</Label>
+                        <Input
+                          id="filename"
+                          placeholder="merged-document"
+                          value={customFilename}
+                          onChange={(e) => setCustomFilename(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div className="grid gap-3">
+                        <Label htmlFor="title">Document Title</Label>
+                        <Input
+                          id="title"
+                          placeholder="Merged Document"
+                          value={metadata.title}
+                          onChange={(e) => setMetadata({...metadata, title: e.target.value})}
+                        />
+                      </div>
+                      
+                      <div className="grid gap-3">
+                        <Label htmlFor="author">Author</Label>
+                        <Input
+                          id="author"
+                          placeholder="Author name"
+                          value={metadata.author}
+                          onChange={(e) => setMetadata({...metadata, author: e.target.value})}
+                        />
+                      </div>
+                      
+                      <div className="grid gap-3">
+                        <Label htmlFor="subject">Subject</Label>
+                        <Input
+                          id="subject"
+                          placeholder="Subject or description"
+                          value={metadata.subject}
+                          onChange={(e) => setMetadata({...metadata, subject: e.target.value})}
+                        />
+                      </div>
+                      
+                      <div className="grid gap-3">
+                        <Label htmlFor="keywords">Keywords</Label>
+                        <Input
+                          id="keywords"
+                          placeholder="keyword1, keyword2, keyword3"
+                          value={metadata.keywords}
+                          onChange={(e) => setMetadata({...metadata, keywords: e.target.value})}
+                        />
+                        <p className="text-xs text-gray-500">Separate keywords with commas</p>
+                      </div>
+                    </div>
+                  </TabsContent>
                   
-                  <div className="grid gap-3">
-                    <Label htmlFor="author">Author</Label>
-                    <Input
-                      id="author"
-                      placeholder="Author name"
-                      value={metadata.author}
-                      onChange={(e) => setMetadata({...metadata, author: e.target.value})}
-                    />
-                  </div>
+                  <TabsContent value="security">
+                    <h2 className="text-2xl font-bold mb-6">PDF Security</h2>
+                    <div className="space-y-6">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="enableEncryption" 
+                          checked={passwordProtection.enableEncryption}
+                          onCheckedChange={(checked) => 
+                            setPasswordProtection({
+                              ...passwordProtection,
+                              enableEncryption: checked === true
+                            })
+                          }
+                        />
+                        <Label htmlFor="enableEncryption" className="font-medium">Enable Password Protection</Label>
+                      </div>
+                      
+                      {passwordProtection.enableEncryption && (
+                        <div className="space-y-4 pl-6 border-l-2 border-purple-200 dark:border-purple-800">
+                          <div className="grid gap-3">
+                            <Label htmlFor="userPassword">User Password (for opening)</Label>
+                            <Input
+                              id="userPassword"
+                              type="password"
+                              placeholder="Leave blank for no password"
+                              value={passwordProtection.userPassword}
+                              onChange={(e) => setPasswordProtection({
+                                ...passwordProtection,
+                                userPassword: e.target.value
+                              })}
+                            />
+                            <p className="text-xs text-gray-500">Required to open the document</p>
+                          </div>
+                          
+                          <div className="grid gap-3">
+                            <Label htmlFor="ownerPassword">Owner Password (for full access)</Label>
+                            <Input
+                              id="ownerPassword"
+                              type="password"
+                              placeholder="Leave blank to use user password"
+                              value={passwordProtection.ownerPassword}
+                              onChange={(e) => setPasswordProtection({
+                                ...passwordProtection,
+                                ownerPassword: e.target.value
+                              })}
+                            />
+                            <p className="text-xs text-gray-500">Provides full rights to the document</p>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label className="font-medium">User Permissions</Label>
+                            <p className="text-xs text-gray-500 mb-3">
+                              These permissions apply to users who open the document with the user password
+                            </p>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              <div className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id="permPrinting" 
+                                  checked={passwordProtection.permissions.printing}
+                                  onCheckedChange={(checked) => 
+                                    setPasswordProtection({
+                                      ...passwordProtection,
+                                      permissions: {
+                                        ...passwordProtection.permissions,
+                                        printing: checked === true
+                                      }
+                                    })
+                                  }
+                                />
+                                <Label htmlFor="permPrinting">Allow Printing</Label>
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id="permModifying" 
+                                  checked={passwordProtection.permissions.modifying}
+                                  onCheckedChange={(checked) => 
+                                    setPasswordProtection({
+                                      ...passwordProtection,
+                                      permissions: {
+                                        ...passwordProtection.permissions,
+                                        modifying: checked === true
+                                      }
+                                    })
+                                  }
+                                />
+                                <Label htmlFor="permModifying">Allow Modifying</Label>
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id="permCopying" 
+                                  checked={passwordProtection.permissions.copying}
+                                  onCheckedChange={(checked) => 
+                                    setPasswordProtection({
+                                      ...passwordProtection,
+                                      permissions: {
+                                        ...passwordProtection.permissions,
+                                        copying: checked === true
+                                      }
+                                    })
+                                  }
+                                />
+                                <Label htmlFor="permCopying">Allow Copying</Label>
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id="permAnnotating" 
+                                  checked={passwordProtection.permissions.annotating}
+                                  onCheckedChange={(checked) => 
+                                    setPasswordProtection({
+                                      ...passwordProtection,
+                                      permissions: {
+                                        ...passwordProtection.permissions,
+                                        annotating: checked === true
+                                      }
+                                    })
+                                  }
+                                />
+                                <Label htmlFor="permAnnotating">Allow Annotations</Label>
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id="permForms" 
+                                  checked={passwordProtection.permissions.fillingForms}
+                                  onCheckedChange={(checked) => 
+                                    setPasswordProtection({
+                                      ...passwordProtection,
+                                      permissions: {
+                                        ...passwordProtection.permissions,
+                                        fillingForms: checked === true
+                                      }
+                                    })
+                                  }
+                                />
+                                <Label htmlFor="permForms">Allow Form Filling</Label>
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id="permAccessibility" 
+                                  checked={passwordProtection.permissions.contentAccessibility}
+                                  onCheckedChange={(checked) => 
+                                    setPasswordProtection({
+                                      ...passwordProtection,
+                                      permissions: {
+                                        ...passwordProtection.permissions,
+                                        contentAccessibility: checked === true
+                                      }
+                                    })
+                                  }
+                                />
+                                <Label htmlFor="permAccessibility">Allow Accessibility</Label>
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id="permAssembly" 
+                                  checked={passwordProtection.permissions.documentAssembly}
+                                  onCheckedChange={(checked) => 
+                                    setPasswordProtection({
+                                      ...passwordProtection,
+                                      permissions: {
+                                        ...passwordProtection.permissions,
+                                        documentAssembly: checked === true
+                                      }
+                                    })
+                                  }
+                                />
+                                <Label htmlFor="permAssembly">Allow Document Assembly</Label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
                   
-                  <div className="grid gap-3">
-                    <Label htmlFor="subject">Subject</Label>
-                    <Input
-                      id="subject"
-                      placeholder="Subject or description"
-                      value={metadata.subject}
-                      onChange={(e) => setMetadata({...metadata, subject: e.target.value})}
-                    />
-                  </div>
-                  
-                  <div className="grid gap-3">
-                    <Label htmlFor="keywords">Keywords</Label>
-                    <Input
-                      id="keywords"
-                      placeholder="keyword1, keyword2, keyword3"
-                      value={metadata.keywords}
-                      onChange={(e) => setMetadata({...metadata, keywords: e.target.value})}
-                    />
-                    <p className="text-xs text-gray-500">Separate keywords with commas</p>
-                  </div>
-                </div>
+                  <TabsContent value="compression">
+                    <h2 className="text-2xl font-bold mb-6">Compression Settings</h2>
+                    <div className="space-y-6">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="enableCompression" 
+                          checked={compressionOptions.enableCompression}
+                          onCheckedChange={(checked) => 
+                            setCompressionOptions({
+                              ...compressionOptions,
+                              enableCompression: checked === true
+                            })
+                          }
+                        />
+                        <Label htmlFor="enableCompression" className="font-medium">Enable PDF Compression</Label>
+                      </div>
+                      
+                      {compressionOptions.enableCompression && (
+                        <div className="space-y-4 pl-6 border-l-2 border-purple-200 dark:border-purple-800">
+                          <div className="space-y-3">
+                            <Label htmlFor="compressionLevel">Compression Level</Label>
+                            <div className="space-y-2">
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="radio"
+                                  id="compressionLow"
+                                  checked={compressionOptions.compressionLevel === 'low'}
+                                  onChange={() => setCompressionOptions({
+                                    ...compressionOptions,
+                                    compressionLevel: 'low'
+                                  })}
+                                  className="h-4 w-4 text-purple-600"
+                                />
+                                <Label htmlFor="compressionLow">Low</Label>
+                                <span className="text-xs text-gray-500 ml-2">
+                                  (Moderate file size reduction, best quality)
+                                </span>
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="radio"
+                                  id="compressionMedium"
+                                  checked={compressionOptions.compressionLevel === 'medium'}
+                                  onChange={() => setCompressionOptions({
+                                    ...compressionOptions,
+                                    compressionLevel: 'medium'
+                                  })}
+                                  className="h-4 w-4 text-purple-600"
+                                />
+                                <Label htmlFor="compressionMedium">Medium</Label>
+                                <span className="text-xs text-gray-500 ml-2">
+                                  (Good balance of size and quality)
+                                </span>
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="radio"
+                                  id="compressionHigh"
+                                  checked={compressionOptions.compressionLevel === 'high'}
+                                  onChange={() => setCompressionOptions({
+                                    ...compressionOptions,
+                                    compressionLevel: 'high'
+                                  })}
+                                  className="h-4 w-4 text-purple-600"
+                                />
+                                <Label htmlFor="compressionHigh">High</Label>
+                                <span className="text-xs text-gray-500 ml-2">
+                                  (Maximum file size reduction, may affect quality)
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
+                            <h4 className="text-sm font-medium text-blue-700 dark:text-blue-300 flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              Compression Info
+                            </h4>
+                            <p className="mt-1 text-sm text-blue-600 dark:text-blue-400">
+                              Higher compression levels may reduce image quality but create smaller file sizes. 
+                              For documents with many images, consider using lower compression to maintain quality.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </TabsContent>
@@ -692,16 +1109,45 @@ export default function PDFMerger() {
                                               }`}
                                             onClick={() => togglePageSelection(index, pageIndex)}
                                           >
-                                            <div className="flex items-center justify-center mb-1">
+                                            <div className="flex items-center justify-between mb-1">
                                               <Checkbox
                                                 checked={selected}
                                                 onCheckedChange={() => togglePageSelection(index, pageIndex)}
-                                                className="mr-1"
+                                                className="ml-1"
                                               />
+                                              <div className="flex space-x-1">
+                                                <Button
+                                                  variant="ghost"
+                                                  size="icon"
+                                                  className="h-6 w-6"
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    rotatePage(index, pageIndex, 'counterclockwise');
+                                                  }}
+                                                >
+                                                  <RotateCcw className="h-3 w-3" />
+                                                </Button>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="icon"
+                                                  className="h-6 w-6"
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    rotatePage(index, pageIndex, 'clockwise');
+                                                  }}
+                                                >
+                                                  <RotateCw className="h-3 w-3" />
+                                                </Button>
+                                              </div>
                                             </div>
                                             <div className="text-xs font-medium">
                                               Page {pageIndex + 1}
                                             </div>
+                                            {file.pageRotations && file.pageRotations[pageIndex] > 0 && (
+                                              <div className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                                                {file.pageRotations[pageIndex]}°
+                                              </div>
+                                            )}
                                           </div>
                                         ))}
                                       </div>
