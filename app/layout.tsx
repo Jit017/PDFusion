@@ -7,8 +7,7 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
   title: "PDFusion - Beautiful PDF Merger Tool",
-  description: "Merge multiple PDF files into a single document with our beautiful and easy-to-use tool",
-    generator: 'v0.dev'
+  description: "Merge multiple PDF files into a single document with our beautiful and easy-to-use tool"
 }
 
 export default function RootLayout({
