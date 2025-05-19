@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@hello-pangea/dnd':
-        specifier: latest
-        version: 18.0.1(@types/react@19.1.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: ^16.5.0
+        version: 16.6.0(@types/react-dom@19.1.5(@types/react@19.1.4))(@types/react@19.1.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@hookform/resolvers':
         specifier: ^3.9.1
         version: 3.10.0(react-hook-form@7.56.4(react@19.1.0))
@@ -123,8 +123,8 @@ importers:
         specifier: 15.2.4
         version: 15.2.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       next-themes:
-        specifier: latest
-        version: 0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: ^0.3.0
+        version: 0.3.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       pdf-lib:
         specifier: ^1.17.1
         version: 1.17.1
@@ -209,11 +209,11 @@ packages:
   '@floating-ui/utils@0.2.9':
     resolution: {integrity: sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg==}
 
-  '@hello-pangea/dnd@18.0.1':
-    resolution: {integrity: sha512-xojVWG8s/TGrKT1fC8K2tIWeejJYTAeJuj36zM//yEm/ZrnZUSFGS15BpO+jGZT1ybWvyXmeDJwPYb4dhWlbZQ==}
+  '@hello-pangea/dnd@16.6.0':
+    resolution: {integrity: sha512-vfZ4GydqbtUPXSLfAvKvXQ6xwRzIjUSjVU0Sx+70VOhc2xx6CdmJXJ8YhH70RpbTUGjxctslQTHul9sIOxCfFQ==}
     peerDependencies:
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
+      react: ^16.8.5 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.5 || ^17.0.0 || ^18.0.0
 
   '@hookform/resolvers@3.10.0':
     resolution: {integrity: sha512-79Dv+3mDF7i+2ajj7SkypSKHhl1cbln1OGavqrsF7p6mbUv11xpqpacPsGDCTRvCSjEEIez2ef1NveSVL3b0Ag==}
@@ -1109,6 +1109,9 @@ packages:
   '@types/d3-timer@3.0.2':
     resolution: {integrity: sha512-Ps3T8E8dZDam6fUyNiMkekK3XUsaUEik+idO9/YjPtfj2qruF8tFBXS7XhtE4iIXBLxhmLjP3SXpLhVf21I9Lw==}
 
+  '@types/hoist-non-react-statics@3.3.6':
+    resolution: {integrity: sha512-lPByRJUer/iN/xa4qpyL0qmL11DqNW81iU/IG1S3uvRUq4oKagz8VCxZjiWkumgt66YT3vOdDgZ0o32sGKtCEw==}
+
   '@types/node@22.15.19':
     resolution: {integrity: sha512-3vMNr4TzNQyjHcRZadojpRaD9Ofr6LsonZAoQ+HMUa/9ORTPoxVIw0e0mpqWpdjj8xybyCM+oKOUH2vwFu/oEw==}
 
@@ -1120,8 +1123,8 @@ packages:
   '@types/react@19.1.4':
     resolution: {integrity: sha512-EB1yiiYdvySuIITtD5lhW4yPyJ31RkJkkDw794LaQYrxCSaQV/47y5o1FMC4zF9ZyjUjzJMZwbovEnT5yHTW6g==}
 
-  '@types/use-sync-external-store@0.0.6':
-    resolution: {integrity: sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg==}
+  '@types/use-sync-external-store@0.0.3':
+    resolution: {integrity: sha512-EwmlvuaxPNej9+T4v5AuBPJa2x2UOJVdjCtDHgcDqitUeOtjnJKJ+apYjVcAoBEMjKW1VVFGZLUb5+qqa09XFA==}
 
   ansi-regex@5.0.1:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
@@ -1391,6 +1394,9 @@ packages:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
 
+  hoist-non-react-statics@3.3.2:
+    resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
+
   input-otp@1.4.1:
     resolution: {integrity: sha512-+yvpmKYKHi9jIGngxagY9oWiiblPB7+nEO75F2l2o4vs+6vpPZZmUl4tBNYuTCvQjhvEIbdNeJu70bhfYP2nbw==}
     peerDependencies:
@@ -1463,6 +1469,9 @@ packages:
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0-rc
 
+  memoize-one@6.0.0:
+    resolution: {integrity: sha512-rkpe71W0N0c0Xz6QD0eJETuWAJGnJ9afsl1srmwPrI+yBCkge5EycXXbYRyvL29zZVUWQCY7InPRCv3GDXuZNw==}
+
   merge2@1.4.1:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
@@ -1487,11 +1496,11 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  next-themes@0.4.6:
-    resolution: {integrity: sha512-pZvgD5L0IEvX5/9GWyHMf3m8BKiVQwsCMHfoFosXtXBMnaS0ZnIJ9ST4b4NqLVKDEm8QBxoNNGNaBv2JNF6XNA==}
+  next-themes@0.3.0:
+    resolution: {integrity: sha512-/QHIrsYpd6Kfk7xakK4svpDI5mmXP0gfvCoJdGpZQ2TOrQZmsW0QxjaiLn8wbIKjtm4BTSqLoix4lxYYOnLJ/w==}
     peerDependencies:
-      react: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
-      react-dom: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
+      react: ^16.8 || ^17 || ^18
+      react-dom: ^16.8 || ^17 || ^18
 
   next@15.2.4:
     resolution: {integrity: sha512-VwL+LAaPSxEkd3lU2xWbgEOtrM8oedmyhBqaVNmgKB+GvZlCy9rgaEc+y2on0wv+l0oSFqLtYD6dcC1eAedUaQ==}
@@ -1645,14 +1654,23 @@ packages:
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
-  react-redux@9.2.0:
-    resolution: {integrity: sha512-ROY9fvHhwOD9ySfrF0wmvu//bKCQ6AeZZq1nJNtbDC+kk5DuSuNX/n6YWYF/SYy7bSba4D4FSz8DJeKY/S/r+g==}
+  react-redux@8.1.3:
+    resolution: {integrity: sha512-n0ZrutD7DaX/j9VscF+uTALI3oUPa/pO4Z3soOBIjuRn/FzVu6aehhysxZCLi6y7duMf52WNZGMl7CtuK5EnRw==}
     peerDependencies:
-      '@types/react': ^18.2.25 || ^19
-      react: ^18.0 || ^19
-      redux: ^5.0.0
+      '@types/react': ^16.8 || ^17.0 || ^18.0
+      '@types/react-dom': ^16.8 || ^17.0 || ^18.0
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+      react-native: '>=0.59'
+      redux: ^4 || ^5.0.0-beta.0
     peerDependenciesMeta:
       '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+      react-dom:
+        optional: true
+      react-native:
         optional: true
       redux:
         optional: true
@@ -1726,8 +1744,8 @@ packages:
       react: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  redux@5.0.1:
-    resolution: {integrity: sha512-M9/ELqF6fy8FwmkpnF0S3YKOqMyoWJ4+CS5Efg2ct3oY9daQvd/Pc71FpGZsVsbl3Cpb+IIcjBDUnnyBdQbq4w==}
+  redux@4.2.1:
+    resolution: {integrity: sha512-LAUYz4lc+Do8/g7aeRa8JkyDErK6ekstQaqWQrNRW//MY1TvCEpMtpTWvlQ+FPbWCx+Xixu/6SHt5N0HR+SB4w==}
 
   resolve@1.22.10:
     resolution: {integrity: sha512-NPRy+/ncIMeDlTAsuqwKIiferiawhefFJtkNSW0qZJEqMEb+qBt/77B/jGeeek+F0uOeN05CDa6HXbbIgtVX4w==}
@@ -1880,6 +1898,11 @@ packages:
       '@types/react':
         optional: true
 
+  use-memo-one@1.1.3:
+    resolution: {integrity: sha512-g66/K7ZQGYrI6dy8GLpVcMsBp4s17xNkYJVSMvTEevGy3nDxHOfE6z8BVE22+5G5x7t3+bhzrlTDB7ObrEE0cQ==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+
   use-sidecar@1.1.3:
     resolution: {integrity: sha512-Fedw0aZvkhynoPYlA5WXrMCAMm+nSWdZt6lzJQ7Ok8S6Q+VsHmHpRWndVRJ8Be0ZbkfPc5LRYH+5XrzXcEeLRQ==}
     engines: {node: '>=10'}
@@ -1956,17 +1979,21 @@ snapshots:
 
   '@floating-ui/utils@0.2.9': {}
 
-  '@hello-pangea/dnd@18.0.1(@types/react@19.1.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@hello-pangea/dnd@16.6.0(@types/react-dom@19.1.5(@types/react@19.1.4))(@types/react@19.1.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       '@babel/runtime': 7.27.1
       css-box-model: 1.2.1
+      memoize-one: 6.0.0
       raf-schd: 4.0.3
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
-      react-redux: 9.2.0(@types/react@19.1.4)(react@19.1.0)(redux@5.0.1)
-      redux: 5.0.1
+      react-redux: 8.1.3(@types/react-dom@19.1.5(@types/react@19.1.4))(@types/react@19.1.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(redux@4.2.1)
+      redux: 4.2.1
+      use-memo-one: 1.1.3(react@19.1.0)
     transitivePeerDependencies:
       - '@types/react'
+      - '@types/react-dom'
+      - react-native
 
   '@hookform/resolvers@3.10.0(react-hook-form@7.56.4(react@19.1.0))':
     dependencies:
@@ -2844,6 +2871,11 @@ snapshots:
 
   '@types/d3-timer@3.0.2': {}
 
+  '@types/hoist-non-react-statics@3.3.6':
+    dependencies:
+      '@types/react': 19.1.4
+      hoist-non-react-statics: 3.3.2
+
   '@types/node@22.15.19':
     dependencies:
       undici-types: 6.21.0
@@ -2856,7 +2888,7 @@ snapshots:
     dependencies:
       csstype: 3.1.3
 
-  '@types/use-sync-external-store@0.0.6': {}
+  '@types/use-sync-external-store@0.0.3': {}
 
   ansi-regex@5.0.1: {}
 
@@ -3117,6 +3149,10 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
+  hoist-non-react-statics@3.3.2:
+    dependencies:
+      react-is: 16.13.1
+
   input-otp@1.4.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
       react: 19.1.0
@@ -3173,6 +3209,8 @@ snapshots:
     dependencies:
       react: 19.1.0
 
+  memoize-one@6.0.0: {}
+
   merge2@1.4.1: {}
 
   micromatch@4.0.8:
@@ -3194,7 +3232,7 @@ snapshots:
 
   nanoid@3.3.11: {}
 
-  next-themes@0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+  next-themes@0.3.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
@@ -3333,14 +3371,20 @@ snapshots:
 
   react-is@18.3.1: {}
 
-  react-redux@9.2.0(@types/react@19.1.4)(react@19.1.0)(redux@5.0.1):
+  react-redux@8.1.3(@types/react-dom@19.1.5(@types/react@19.1.4))(@types/react@19.1.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(redux@4.2.1):
     dependencies:
-      '@types/use-sync-external-store': 0.0.6
+      '@babel/runtime': 7.27.1
+      '@types/hoist-non-react-statics': 3.3.6
+      '@types/use-sync-external-store': 0.0.3
+      hoist-non-react-statics: 3.3.2
       react: 19.1.0
+      react-is: 18.3.1
       use-sync-external-store: 1.5.0(react@19.1.0)
     optionalDependencies:
       '@types/react': 19.1.4
-      redux: 5.0.1
+      '@types/react-dom': 19.1.5(@types/react@19.1.4)
+      react-dom: 19.1.0(react@19.1.0)
+      redux: 4.2.1
 
   react-remove-scroll-bar@2.3.8(@types/react@19.1.4)(react@19.1.0):
     dependencies:
@@ -3418,7 +3462,9 @@ snapshots:
       tiny-invariant: 1.3.3
       victory-vendor: 36.9.2
 
-  redux@5.0.1: {}
+  redux@4.2.1:
+    dependencies:
+      '@babel/runtime': 7.27.1
 
   resolve@1.22.10:
     dependencies:
@@ -3592,6 +3638,10 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       '@types/react': 19.1.4
+
+  use-memo-one@1.1.3(react@19.1.0):
+    dependencies:
+      react: 19.1.0
 
   use-sidecar@1.1.3(@types/react@19.1.4)(react@19.1.0):
     dependencies:
