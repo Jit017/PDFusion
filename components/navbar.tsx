@@ -39,19 +39,19 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             <Link
-              href="#"
+              href="/features"
               className="text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 font-medium"
             >
               Features
             </Link>
             <Link
-              href="#"
+              href="/how-it-works"
               className="text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 font-medium"
             >
               How It Works
             </Link>
             <Link
-              href="#"
+              href="/faq"
               className="text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 font-medium"
             >
               FAQ
@@ -75,9 +75,11 @@ export default function Navbar() {
               </Button>
             )}
 
-            <Button className="hidden md:flex bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0">
-              Get Started
-            </Button>
+            <Link href="/">
+              <Button className="hidden md:flex bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0">
+                Get Started
+              </Button>
+            </Link>
 
             {/* Mobile menu button */}
             <Button
@@ -102,32 +104,33 @@ export default function Navbar() {
       >
         <nav className="flex flex-col space-y-6 mt-8">
           <Link
-            href="#"
+            href="/features"
             className="text-lg font-medium text-gray-900 dark:text-gray-100 hover:text-purple-600 dark:hover:text-purple-400"
             onClick={() => setMobileMenuOpen(false)}
           >
             Features
           </Link>
           <Link
-            href="#"
+            href="/how-it-works"
             className="text-lg font-medium text-gray-900 dark:text-gray-100 hover:text-purple-600 dark:hover:text-purple-400"
             onClick={() => setMobileMenuOpen(false)}
           >
             How It Works
           </Link>
           <Link
-            href="#"
+            href="/faq"
             className="text-lg font-medium text-gray-900 dark:text-gray-100 hover:text-purple-600 dark:hover:text-purple-400"
             onClick={() => setMobileMenuOpen(false)}
           >
             FAQ
           </Link>
-          <Button
-            className="w-full mt-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Get Started
-          </Button>
+          <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+            <Button
+              className="w-full mt-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
+            >
+              Get Started
+            </Button>
+          </Link>
         </nav>
       </div>
     </header>
